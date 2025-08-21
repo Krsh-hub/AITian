@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, BookOpen, Users, Award, TrendingUp, Star, CheckCircle } from "lucide-react";
 import CourseCard from "@/components/CourseCard";
-import { courses } from "@/data/courses";
+import { useFeaturedCourses } from "@/hooks/use-courses";
 
 const Home = () => {
-  const featuredCourses = courses.filter(course => course.featured).slice(0, 3);
+  const { data: featuredCourses, isLoading } = useFeaturedCourses();
 
   return (
     <div className="min-h-screen">
@@ -130,11 +130,25 @@ const Home = () => {
             </p>
           </div>
           
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {featuredCourses.map((course) => (
-              <CourseCard key={course.id} course={course} />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="bg-muted rounded-lg h-64 mb-4"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-muted rounded w-3/4"></div>
+                    <div className="h-3 bg-muted rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {featuredCourses?.slice(0, 3).map((course) => (
+                <CourseCard key={course.id} course={course} />
+              ))}
+            </div>
+          )}
           
           <div className="text-center">
             <Link to="/courses">

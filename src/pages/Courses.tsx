@@ -4,24 +4,40 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Filter } from "lucide-react";
 import CourseCard from "@/components/CourseCard";
-import { courses } from "@/data/courses";
+import { useCourses, useSearchCourses, useCoursesByCategory, useCoursesByLevel } from "@/hooks/use-courses";
 
 const Courses = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedLevel, setSelectedLevel] = useState("all");
 
-  const categories = ["all", ...Array.from(new Set(courses.map(course => course.category)))];
+  const { data: allCourses, isLoading } = useCourses();
+  const { data: searchResults } = useSearchCourses(searchTerm);
+  const { data: categoryResults } = useCoursesByCategory(selectedCategory !== "all" ? selectedCategory : "");
+  const { data: levelResults } = useCoursesByLevel(selectedLevel !== "all" ? selectedLevel : "");
+
+  // Get unique categories and levels from all courses
+  const categories = ["all", ...Array.from(new Set(allCourses?.map(course => course.category) || []))];
   const levels = ["all", "Beginner", "Intermediate", "Advanced"];
 
-  const filteredCourses = courses.filter(course => {
-    const matchesSearch = course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         course.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || course.category === selectedCategory;
-    const matchesLevel = selectedLevel === "all" || course.level === selectedLevel;
-    
-    return matchesSearch && matchesCategory && matchesLevel;
-  });
+  // Determine which data to show based on filters
+  let filteredCourses = allCourses || [];
+  
+  if (searchTerm && searchResults) {
+    filteredCourses = searchResults;
+  } else if (selectedCategory !== "all" && categoryResults) {
+    filteredCourses = categoryResults;
+  } else if (selectedLevel !== "all" && levelResults) {
+    filteredCourses = levelResults;
+  }
+
+  // Apply additional filters if needed
+  if (searchTerm && selectedCategory !== "all") {
+    filteredCourses = filteredCourses.filter(course => course.category === selectedCategory);
+  }
+  if (searchTerm && selectedLevel !== "all") {
+    filteredCourses = filteredCourses.filter(course => course.level === selectedLevel);
+  }
 
   return (
     <div className="min-h-screen py-20">
@@ -79,7 +95,7 @@ const Courses = () => {
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
             <div className="flex items-center text-sm text-muted-foreground">
               <Filter className="h-4 w-4 mr-2" />
-              Showing {filteredCourses.length} of {courses.length} courses
+              Showing {filteredCourses.length} of {(allCourses?.length ?? 0)} courses
             </div>
             <Button
               variant="ghost"
@@ -97,7 +113,19 @@ const Courses = () => {
         </div>
 
         {/* Course Grid */}
-        {filteredCourses.length > 0 ? (
+        {isLoading ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="animate-pulse">
+                <div className="bg-muted rounded-lg h-64 mb-4"></div>
+                <div className="space-y-2">
+                  <div className="h-4 bg-muted rounded w-3/4"></div>
+                  <div className="h-3 bg-muted rounded w-1/2"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filteredCourses.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredCourses.map((course) => (
               <CourseCard key={course.id} course={course} />

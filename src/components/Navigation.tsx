@@ -1,11 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, BookOpen, User, LogIn } from "lucide-react";
+import { Menu, X, BookOpen, User, LogIn, LogOut, Shield } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { userService } from "@/lib/user-service";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { user, signOut } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
+
+  // Check if user is admin and load user profile
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (user) {
+        try {
+          const adminStatus = await userService.isAdmin();
+          setIsAdmin(adminStatus);
+          
+          // Load user profile
+          const profile = await userService.getCurrentUserProfile();
+          setUserProfile(profile);
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+        }
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   const navigationLinks = [
     { href: "/", label: "Home" },
@@ -48,14 +73,47 @@ const Navigation = () => {
             </div>
             
             <div className="flex items-center space-x-3">
-              <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
-                <User className="h-4 w-4 mr-2" />
-                Dashboard
-              </Button>
-              <Button variant="default" size="sm" className="bg-primary hover:bg-primary-hover">
-                <LogIn className="h-4 w-4 mr-2" />
-                Sign In
-              </Button>
+              {user ? (
+                <>
+                  <Link to="/dashboard">
+                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                      <User className="h-4 w-4 mr-2" />
+                      {userProfile?.full_name || 'Dashboard'}
+                    </Button>
+                  </Link>
+                  {isAdmin && (
+                    <Link to="/admin">
+                      <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                        <Shield className="h-4 w-4 mr-2" />
+                        Admin
+                      </Button>
+                    </Link>
+                  )}
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={signOut}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link to="/signin">
+                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link to="/signup">
+                    <Button variant="default" size="sm" className="bg-primary hover:bg-primary-hover">
+                      Sign Up
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
 
@@ -91,14 +149,47 @@ const Navigation = () => {
                 </Link>
               ))}
               <div className="border-t border-border pt-2 mt-2 space-y-2">
-                <Button variant="ghost" size="sm" className="w-full justify-start">
-                  <User className="h-4 w-4 mr-2" />
-                  Dashboard
-                </Button>
-                <Button variant="default" size="sm" className="w-full bg-primary hover:bg-primary-hover">
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Sign In
-                </Button>
+                                 {user ? (
+                   <>
+                     <Link to="/dashboard" className="w-full">
+                       <Button variant="ghost" size="sm" className="w-full justify-start">
+                         <User className="h-4 w-4 mr-2" />
+                         Dashboard
+                       </Button>
+                     </Link>
+                     {isAdmin && (
+                       <Link to="/admin" className="w-full">
+                         <Button variant="ghost" size="sm" className="w-full justify-start">
+                           <Shield className="h-4 w-4 mr-2" />
+                           Admin
+                         </Button>
+                       </Link>
+                     )}
+                     <Button 
+                       variant="outline" 
+                       size="sm" 
+                       className="w-full"
+                       onClick={signOut}
+                     >
+                       <LogOut className="h-4 w-4 mr-2" />
+                       Sign Out
+                     </Button>
+                   </>
+                 ) : (
+                  <>
+                    <Link to="/signin" className="w-full">
+                      <Button variant="ghost" size="sm" className="w-full justify-start">
+                        <LogIn className="h-4 w-4 mr-2" />
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link to="/signup" className="w-full">
+                      <Button variant="default" size="sm" className="w-full bg-primary hover:bg-primary-hover">
+                        Sign Up
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>

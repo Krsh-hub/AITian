@@ -1,8 +1,10 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   Star, 
   Users, 
@@ -15,13 +17,56 @@ import {
   MessageCircle,
   BookOpen
 } from "lucide-react";
-import { courses } from "@/data/courses";
+import { useCourse } from "@/hooks/use-courses";
 
 const CourseDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const course = courses.find(c => c.id === id);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [searchParams] = useSearchParams();
+  const { data: course, isLoading, error } = useCourse(id || "");
 
-  if (!course) {
+  const preview = useMemo(() => {
+    if (!course || !course.resources) return { url: "", type: "none" as const };
+    const resources = course.resources as any[];
+    const candidate = resources.find((r) => {
+      const title = (r?.title || "").toLowerCase();
+      const link = (r?.downloadLink || r?.download_link || "").toLowerCase();
+      return (
+        title.includes("preview") ||
+        title.includes("trailer") ||
+        link.includes("youtube.com") ||
+        link.includes("youtu.be") ||
+        link.includes("vimeo.com") ||
+        link.endsWith(".mp4")
+      );
+    });
+    if (!candidate) return { url: "", type: "none" as const };
+    const url = candidate.downloadLink || candidate.download_link || "";
+    if (url.includes("youtube.com") || url.includes("youtu.be")) return { url, type: "youtube" as const };
+    if (url.includes("vimeo.com")) return { url, type: "vimeo" as const };
+    if (url.endsWith(".mp4")) return { url, type: "mp4" as const };
+    return { url, type: "external" as const };
+  }, [course]);
+
+  useEffect(() => {
+    const shouldOpen = searchParams.get("preview");
+    if (shouldOpen && preview.url) {
+      setPreviewOpen(true);
+    }
+  }, [searchParams, preview]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="text-muted-foreground">Loading course details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !course) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
@@ -60,7 +105,14 @@ const CourseDetail = () => {
                   className="w-full h-64 md:h-80 object-cover"
                 />
                 <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                  <Button size="lg" className="bg-white/20 backdrop-blur-sm border-white text-white hover:bg-white/30">
+                  <Button
+                    size="lg"
+                    className="bg-white/20 backdrop-blur-sm border-white text-white hover:bg-white/30"
+                    disabled={!preview.url}
+                    onClick={() => {
+                      if (preview.url) setPreviewOpen(true);
+                    }}
+                  >
                     <Play className="mr-2 h-5 w-5" />
                     Preview Course
                   </Button>
@@ -260,8 +312,60 @@ const CourseDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Preview Modal */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Course Preview</DialogTitle>
+          </DialogHeader>
+          {preview.type === "youtube" && (
+            <div className="aspect-video w-full">
+              <iframe
+                className="w-full h-full"
+                src={toYouTubeEmbed(preview.url)}
+                title="Course Preview"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+          )}
+          {preview.type === "vimeo" && (
+            <div className="aspect-video w-full">
+              <iframe className="w-full h-full" src={preview.url} title="Course Preview" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
+            </div>
+          )}
+          {preview.type === "mp4" && (
+            <video className="w-full" controls src={preview.url} />
+          )}
+          {preview.type === "external" && (
+            <div className="space-y-3">
+              <p>No embeddable preview available. You can open the preview link in a new tab.</p>
+              <a className="text-primary underline" href={preview.url} target="_blank" rel="noreferrer">Open preview</a>
+            </div>
+          )}
+          {preview.type === "none" && (
+            <p>No preview provided for this course.</p>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
 export default CourseDetail;
+
+function toYouTubeEmbed(url: string): string {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtu.be")) {
+      const id = u.pathname.replace("/", "");
+      return `https://www.youtube.com/embed/${id}`;
+    }
+    if (u.hostname.includes("youtube.com")) {
+      const id = u.searchParams.get("v");
+      if (id) return `https://www.youtube.com/embed/${id}`;
+    }
+  } catch {}
+  return url;
+}
