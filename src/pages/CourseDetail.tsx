@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,9 @@ import { courses } from "@/data/courses";
 const CourseDetail = () => {
   const { id } = useParams<{ id: string }>();
   const course = courses.find(c => c.id === id);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const preview: { url: string | null } = { url: null };
 
   if (!course) {
     return (
