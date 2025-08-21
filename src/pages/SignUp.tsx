@@ -14,7 +14,11 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 const signUpSchema = z.object({
   fullName: z.string().min(2, "Full name must be at least 2 characters"),
   email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .regex(/\d/, "Password must include at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must include at least one special character"),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
@@ -27,7 +31,7 @@ const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -115,7 +119,7 @@ const SignUp = () => {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
+                  placeholder="At least 6 chars, 1 number, 1 special character"
                   {...register("password")}
                   className={errors.password ? "border-destructive" : ""}
                 />
@@ -180,6 +184,19 @@ const SignUp = () => {
               ) : (
                 "Create Account"
               )}
+            </Button>
+
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+
+            <Button type="button" variant="outline" className="w-full" onClick={() => signInWithGoogle()}>
+              Continue with Google
             </Button>
           </form>
 

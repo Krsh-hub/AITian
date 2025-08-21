@@ -50,7 +50,7 @@ const Navigation = () => {
           <Link to="/" className="flex items-center space-x-2 group">
             <BookOpen className="h-8 w-8 text-primary group-hover:text-accent transition-colors" />
             <span className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              CourseCraft
+              AITian
             </span>
           </Link>
 

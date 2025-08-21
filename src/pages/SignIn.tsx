@@ -21,7 +21,7 @@ type SignInForm = z.infer<typeof signInSchema>;
 const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -129,6 +129,19 @@ const SignIn = () => {
               ) : (
                 "Sign In"
               )}
+            </Button>
+
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+
+            <Button type="button" variant="outline" className="w-full" onClick={() => signInWithGoogle()}>
+              Continue with Google
             </Button>
           </form>
 
