@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,10 +17,12 @@ import {
   BookOpen
 } from "lucide-react";
 import { courses } from "@/data/courses";
+import PaymentModal from "@/components/PaymentModal";
 
 const CourseDetail = () => {
   const { id } = useParams<{ id: string }>();
   const course = courses.find(c => c.id === id);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   if (!course) {
     return (
@@ -191,6 +194,7 @@ const CourseDetail = () => {
                 <Button 
                   size="lg" 
                   className="w-full bg-accent hover:bg-accent-hover text-white font-semibold py-3"
+                  onClick={() => setIsPaymentModalOpen(true)}
                 >
                   <Award className="mr-2 h-5 w-5" />
                   Enroll Now
@@ -260,6 +264,16 @@ const CourseDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        courseId={course.id}
+        courseTitle={course.title}
+        amount={course.price}
+        originalPrice={course.originalPrice}
+      />
     </div>
   );
 };
