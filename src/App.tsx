@@ -8,6 +8,7 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import Courses from "./pages/Courses";
 import CourseDetail from "./pages/CourseDetail";
+<<<<<<< HEAD
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Dashboard from "./pages/Dashboard";
@@ -17,6 +18,9 @@ import AdminCourseEdit from "./pages/AdminCourseEdit";
 import AdminCourseResources from "./pages/AdminCourseResources";
 import AdminTest from "./pages/AdminTest";
 import TestAuth from "./pages/TestAuth";
+=======
+import PaymentSuccess from "./pages/PaymentSuccess";
+>>>>>>> origin/my-feature-branch
 import NotFound from "./pages/NotFound";
 import RequireAuth from "./components/RequireAuth";
 import RequireAdmin from "./components/RequireAdmin";
@@ -27,6 +31,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+<<<<<<< HEAD
     <AuthProvider>
       <TooltipProvider>
         <Toaster />
@@ -54,6 +59,24 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>
+=======
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/course/:id" element={<CourseDetail />} />
+            <Route path="/course/:id/success" element={<PaymentSuccess />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Layout>
+      </BrowserRouter>
+    </TooltipProvider>
+>>>>>>> origin/my-feature-branch
   </QueryClientProvider>
 );
 
