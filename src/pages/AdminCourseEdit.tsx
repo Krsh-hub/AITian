@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { AdminCourseForm, AdminCourseFormValues } from "@/components/AdminCourseForm";
 import { useAuth } from "@/hooks/use-auth";
 import { userService } from "@/lib/user-service";
@@ -73,6 +74,13 @@ const AdminCourseEdit = () => {
           <CardDescription>Update course details</CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="flex justify-end mb-4">
+            {id && (
+              <Link to={`/admin/courses/${id}/resources`}>
+                <Button variant="outline" size="sm">Manage Resources</Button>
+              </Link>
+            )}
+          </div>
           <AdminCourseForm initialValues={initialValues} mode="edit" onSubmit={handleSubmit} submitting={submitting} />
         </CardContent>
       </Card>

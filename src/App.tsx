@@ -14,12 +14,14 @@ import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminCourseNew from "./pages/AdminCourseNew";
 import AdminCourseEdit from "./pages/AdminCourseEdit";
+import AdminCourseResources from "./pages/AdminCourseResources";
 import AdminTest from "./pages/AdminTest";
 import TestAuth from "./pages/TestAuth";
 import NotFound from "./pages/NotFound";
 import RequireAuth from "./components/RequireAuth";
 import RequireAdmin from "./components/RequireAdmin";
 import PublicOnly from "./components/PublicOnly";
+import CourseResources from "./pages/CourseResources";
 
 const queryClient = new QueryClient();
 
@@ -35,10 +37,12 @@ const App = () => (
               <Route path="/" element={<Home />} />
               <Route path="/courses" element={<Courses />} />
               <Route path="/course/:id" element={<CourseDetail />} />
+              <Route path="/course/:id/resources" element={<RequireAuth><CourseResources /></RequireAuth>} />
               <Route path="/signin" element={<PublicOnly><SignIn /></PublicOnly>} />
               <Route path="/signup" element={<PublicOnly><SignUp /></PublicOnly>} />
               <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
               <Route path="/admin" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
+              <Route path="/admin/courses/:id/resources" element={<RequireAdmin><AdminCourseResources /></RequireAdmin>} />
               <Route path="/admin/courses/new" element={<AdminCourseNew />} />
               <Route path="/admin/courses/edit/:id" element={<AdminCourseEdit />} />
               <Route path="/admin-test" element={<AdminTest />} />
