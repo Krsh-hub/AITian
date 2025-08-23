@@ -17,14 +17,25 @@ import {
   MessageCircle,
   BookOpen
 } from "lucide-react";
-import { courses } from "@/data/courses";
+import { useCourse } from "@/hooks/use-courses";
+import PaymentModal from "@/components/PaymentModal";
 
 const CourseDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const course = courses.find(c => c.id === id);
+  const { data: course, isLoading } = useCourse(id ?? "");
   const [previewOpen, setPreviewOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const preview: { url: string | null } = { url: null };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <h1 className="text-2xl font-bold text-foreground">Loading course...</h1>
+        </div>
+      </div>
+    );
+  }
 
   if (!course) {
     return (
@@ -273,6 +284,16 @@ const CourseDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        courseId={course.id}
+        courseTitle={course.title}
+        amount={course.price}
+        originalPrice={course.originalPrice}
+      />
     </div>
   );
 };
