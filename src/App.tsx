@@ -19,10 +19,15 @@ import AdminTest from "./pages/AdminTest";
 import TestAuth from "./pages/TestAuth";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import NotFound from "./pages/NotFound";
+import Tests from "./pages/Tests";
+import CourseTest from "./pages/CourseTest";
+import AdminTests from "./pages/AdminTests";
 import RequireAuth from "./components/RequireAuth";
 import RequireAdmin from "./components/RequireAdmin";
 import PublicOnly from "./components/PublicOnly";
 import CourseResources from "./pages/CourseResources";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 
 const queryClient = new QueryClient();
 
@@ -37,16 +42,22 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/courses" element={<Courses />} />
+              <Route path="/tests" element={<Tests />} />
+              <Route path="/tests/:id" element={<CourseTest />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
               <Route path="/course/:id" element={<CourseDetail />} />
               <Route path="/course/:id/success" element={<PaymentSuccess />} />
               <Route
                 path="/course/:id/resources"
                 element={<RequireAuth><CourseResources /></RequireAuth>}
               />
+
               <Route path="/signin" element={<PublicOnly><SignIn /></PublicOnly>} />
               <Route path="/signup" element={<PublicOnly><SignUp /></PublicOnly>} />
               <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
               <Route path="/admin" element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
+              <Route path="/admin/tests" element={<RequireAdmin><AdminTests /></RequireAdmin>} />
               <Route
                 path="/admin/courses/:id/resources"
                 element={<RequireAdmin><AdminCourseResources /></RequireAdmin>}

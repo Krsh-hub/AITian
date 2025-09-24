@@ -30,6 +30,8 @@ export interface Course {
   }[];
 }
 
+
+
 export interface Service {
   id: string;
   title: string;

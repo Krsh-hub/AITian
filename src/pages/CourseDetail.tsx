@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +18,11 @@ import {
   BookOpen
 } from "lucide-react";
 import { useCourse } from "@/hooks/use-courses";
+import { userService } from "@/lib/user-service";
 import PaymentModal from "@/components/PaymentModal";
+import RazorpayPaymentButton from "@/components/RazorpayPaymentButton";
+import CertificateButton from "@/components/CertificateButton";
+import { useCourseCompletion } from "@/hooks/use-certificate";
 
 const CourseDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +30,7 @@ const CourseDetail = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const preview: { url: string | null } = { url: null };
+  const { isCompleted: isCourseCompleted } = useCourseCompletion(id ?? "");
 
   if (isLoading) {
     return (
@@ -211,14 +216,22 @@ const CourseDetail = () => {
                   )}
                 </div>
 
-                <Button 
-                  size="lg" 
+                <RazorpayPaymentButton
+                  courseId={course.id}
+                  courseTitle={course.title}
+                  amount={course.price}
                   className="w-full bg-accent hover:bg-accent-hover text-white font-semibold py-3"
-                  onClick={() => setIsPaymentModalOpen(true)}
+                  onSuccess={() => {
+                    // Redirect to success page or dashboard
+                    window.location.href = `/course/${course.id}/success`;
+                  }}
+                  onFailure={(error) => {
+                    console.error('Payment failed:', error);
+                  }}
                 >
                   <Award className="mr-2 h-5 w-5" />
-                  Enroll Now
-                </Button>
+                  Enroll Now - ₹{course.price}
+                </RazorpayPaymentButton>
 
                 <div className="space-y-3 text-sm">
                   <div className="flex items-center">
@@ -227,7 +240,7 @@ const CourseDetail = () => {
                   </div>
                   <div className="flex items-center">
                     <CheckCircle className="h-4 w-4 text-success mr-3" />
-                    <span>Certificate of completion</span>
+                    <span>Certificate of completion {isCourseCompleted ? '(unlocked)' : '(pass the test to unlock)'}</span>
                   </div>
                   <div className="flex items-center">
                     <CheckCircle className="h-4 w-4 text-success mr-3" />
@@ -246,10 +259,12 @@ const CourseDetail = () => {
                     <MessageCircle className="mr-2 h-4 w-4" />
                     Contact Instructor
                   </Button>
-                  <Button variant="outline" className="w-full">
-                    <Download className="mr-2 h-4 w-4" />
-                    Download Brochure
-                  </Button>
+                  <CertificateButton
+                    courseId={course.id}
+                    courseName={course.title}
+                    isCompleted={isCourseCompleted}
+                    className="w-full"
+                  />
                 </div>
               </CardContent>
             </Card>

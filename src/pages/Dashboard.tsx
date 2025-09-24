@@ -5,14 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { BookOpen, Calendar, Mail, LogOut, User } from "lucide-react";
+import { BookOpen, Calendar, Mail, LogOut, User, Award, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { getAllUserCertificates } from "@/services/certificateService";
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [certificates, setCertificates] = useState<any[]>([]);
 
   useEffect(() => {
     const loadUserProfile = async () => {
@@ -26,7 +28,19 @@ const Dashboard = () => {
       }
     };
 
+    const loadCertificates = async () => {
+      if (user) {
+        try {
+          const certs = await getAllUserCertificates();
+          setCertificates(certs);
+        } catch (error) {
+          console.error('Error loading certificates:', error);
+        }
+      }
+    };
+
     loadUserProfile();
+    loadCertificates();
   }, [user]);
 
   const handleSignOut = async () => {
@@ -170,7 +184,7 @@ const Dashboard = () => {
                   <p className="text-sm text-muted-foreground">Hours</p>
                 </div>
                 <div className="text-center p-4 bg-secondary rounded-lg">
-                  <p className="text-2xl font-bold text-primary">8</p>
+                  <p className="text-2xl font-bold text-primary">{certificates.length}</p>
                   <p className="text-sm text-muted-foreground">Certificates</p>
                 </div>
                 <div className="text-center p-4 bg-secondary rounded-lg">
@@ -214,6 +228,59 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Certificates Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Award className="h-5 w-5" />
+              Your Certificates
+            </CardTitle>
+            <CardDescription>
+              Download your course completion certificates
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {certificates.length > 0 ? (
+              <div className="space-y-4">
+                {certificates.map((cert, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-secondary rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center">
+                        <Award className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Course Certificate</p>
+                        <p className="text-sm text-muted-foreground">
+                          Issued on {new Date(cert.issuedOn).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.open(cert.pdfUrl, '_blank')}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Award className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">No certificates yet</h3>
+                <p className="text-muted-foreground mb-4">
+                  Complete courses and pass tests to earn certificates
+                </p>
+                <Button onClick={() => navigate('/courses')}>
+                  Browse Courses
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

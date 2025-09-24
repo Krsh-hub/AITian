@@ -261,3 +261,8 @@
 .upi-icon-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Section backgrounds */
+.bg-soft-blue {
+  background-color: hsl(210 50% 98%);
+}

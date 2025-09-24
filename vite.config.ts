@@ -11,8 +11,8 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    // Enable the componentTagger only when explicitly allowed via env to avoid runtime issues
+    (mode === 'development' && process.env.LOVABLE_TAGGER === 'true') && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {

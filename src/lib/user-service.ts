@@ -182,10 +182,7 @@ export const userService = {
 
     const { error } = await supabase
       .from('course_enrollments')
-      .update({ 
-        progress: 100,
-        completed: true 
-      })
+      .update({ progress: 100, completed: true })
       .eq('user_id', user.id)
       .eq('course_id', courseId);
 
@@ -193,5 +190,29 @@ export const userService = {
       console.error('Error completing course:', error);
       throw new Error('Failed to complete course');
     }
+  },
+
+  // Check if user passed test for course to allow certification
+  async hasPassedCourseTest(courseId: string): Promise<boolean> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return false;
+    // find latest test for course
+    const { data: tests } = await supabase
+      .from('tests')
+      .select('id')
+      .eq('course_id', courseId)
+      .order('created_at', { ascending: false })
+      .limit(1);
+    const testId = tests?.[0]?.id;
+    if (!testId) return false;
+    const { data: res } = await supabase
+      .from('test_results')
+      .select('passed')
+      .eq('test_id', testId)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    return !!res?.passed;
   }
 };

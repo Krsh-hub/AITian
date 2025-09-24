@@ -38,7 +38,12 @@ const CourseResources = () => {
 			<div className="max-w-4xl mx-auto p-4 space-y-6">
 				<div className="flex items-center justify-between">
 					<h1 className="text-2xl font-bold">Your Course Resources</h1>
-					<Link to={`/course/${courseId}`} className="text-primary underline">Back to course</Link>
+					<div className="flex items-center gap-3">
+						<Link to={`/tests/${courseId}`}>
+							<Button size="sm" className="bg-accent hover:bg-accent-hover">Go to Test</Button>
+						</Link>
+						<Link to={`/course/${courseId}`} className="text-primary underline">Back to course</Link>
+					</div>
 				</div>
 
 				<Card>
